@@ -1,0 +1,17 @@
+Makefile
+Makefile.in
+aclocal.m4
+autom4te.cache/
+build-aux/
+build-config.h
+build-config.h.in
+config.log
+config.status
+configure
+m4/
+miltertest
+*.o
+*.lo
+*.la
+*.libs/
+.deps/
