@@ -65,3 +65,28 @@ Key design questions:
 
 Inspired by the CGI pattern: same "turn protocol data into environment variables
 and exec" approach that made CGI so accessible in the early web.
+
+---
+
+### forensic logging milter
+
+A diagnostic milter for tracking down crashes in other milters in the chain.
+When a milter crashes mid-message, the MTA typically has no record of which
+message triggered it. This milter acts as a canary:
+
+- On `connect` / `envfrom`: write a record to a log file containing the message
+  envelope and metadata (timestamp, client IP, sender, recipients, queue ID)
+- On `eom`: remove the record - the message completed successfully
+- On `abort` / `close` without a preceding `eom`: leave the record in place
+
+If a downstream milter crashes, the forensic log retains the last record written,
+identifying which message was in flight at the time of the crash. After a restart,
+the operator can inspect the log to find the triggering message and replay it.
+
+Implementation notes:
+- Log file should be one record per line (or delimited block) so partial writes
+  are detectable
+- Record format should include enough to reconstruct the SMTP transaction:
+  timestamp, queue ID, HELO hostname, client IP, envelope sender, recipients
+- Optionally write the full message to a spool directory for replay with miltertest
+- Locking needed if multiple MTA worker processes share the log file
