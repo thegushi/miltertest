@@ -2,6 +2,25 @@
 
 ## Tools to add to this repo
 
+### library/utils split for OpenDKIM and OpenDMARC (low priority / uncertain)
+
+Distributions (Debian, Fedora) already split `libopendkim` from `opendkim` at
+package build time. Making this a first-class upstream concept would mean:
+
+- `libopendkim` / `libopendmarc` as standalone published libraries with their
+  own repo and release cycle
+- `opendkim-utils` / `opendmarc-utils` packages for tools like `opendkim-testkey`,
+  `opendmarc-check` - useful for troubleshooting without running a milter,
+  same pattern as `bind-utils` vs `named`
+- The milter itself becomes just another consumer of the library
+
+Prerequisite for this making sense upstream: the library repos would need their
+own CI, versioning, and release process. Significant reorganization. Distros are
+already doing the split themselves so the urgency is low.
+
+---
+
+
 ### file-driven test milter (from OpenDMARC test.c)
 
 OpenDMARC has `opendmarc/test.c` (~722 lines) - a command-line tool that drives a
