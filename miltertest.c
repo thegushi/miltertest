@@ -1391,7 +1391,7 @@ mt_connect(lua_State *l)
 	useconds_t interval = 0;
 	char *at;
 	char *p;
-	const char *sockinfo;
+	char sockinfo[BUFRSZ];
 	struct mt_context *new;
 
 	assert(l != NULL);
@@ -1406,7 +1406,15 @@ mt_connect(lua_State *l)
 		lua_error(l);
 	}
 
-	sockinfo = lua_tostring(l, 1);
+	/*
+	**  lua_tostring() returns a pointer into Lua-owned storage that the
+	**  lua_pop() below may reclaim or share with other interned strings.
+	**  The dispatch logic NUL-terminates the protocol prefix and host part
+	**  of this string in place, so copy it into a buffer we own first;
+	**  mutating the Lua-owned storage (and reading it after the pop) is
+	**  undefined behaviour.
+	*/
+	strlcpy(sockinfo, lua_tostring(l, 1), sizeof sockinfo);
 	if (top == 3)
 	{
 		char *f;
